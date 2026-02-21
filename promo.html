@@ -1,1 +1,290 @@
-404: Not Found
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beats &amp; Bourbon &mdash; Weekly Promo</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: #0D0B08;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 20px;
+}
+.flyer {
+  width: 1080px;
+  min-height: 1080px;
+  background: linear-gradient(180deg, #0D0B08 0%, #1A1A2E 30%, #0D0B08 100%);
+  position: relative;
+  overflow: hidden;
+  padding: 60px 50px;
+}
+.flyer::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, transparent, #F4C430, transparent);
+}
+.flyer::after {
+  content: "";
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, transparent, #F4C430, transparent);
+}
+.header { text-align: center; margin-bottom: 40px; }
+.brand-icon { font-size: 60px; margin-bottom: 10px; }
+.brand-name {
+  font-size: 52px;
+  font-weight: 900;
+  color: #F4C430;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.tagline {
+  font-size: 20px;
+  color: #9990A0;
+  margin-top: 8px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+}
+.theme-name {
+  font-size: 24px;
+  color: #F4C430;
+  margin-top: 20px;
+  font-style: italic;
+  opacity: 0.8;
+}
+.date-banner {
+  text-align: center;
+  margin: 30px 0;
+  padding: 20px;
+  border-top: 2px solid rgba(244,196,48,0.3);
+  border-bottom: 2px solid rgba(244,196,48,0.3);
+}
+.date-label {
+  font-size: 14px;
+  color: #9990A0;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+.date-value {
+  font-size: 32px;
+  color: #E8E0D4;
+  font-weight: bold;
+  margin-top: 5px;
+}
+.time-range {
+  font-size: 16px;
+  color: #9990A0;
+  margin-top: 5px;
+}
+.lineup { margin: 30px 0; }
+.lineup-title {
+  font-size: 16px;
+  color: #F4C430;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.slot-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+}
+.slot-row:nth-child(odd) { background: rgba(26,26,46,0.8); }
+.slot-row:nth-child(even) { background: rgba(13,11,8,0.6); }
+.slot-row.anchor { border-left: 4px solid #9B59B6; }
+.slot-row.filled { border-left: 4px solid #F4C430; }
+.slot-row.open { border-left: 4px solid #E74C3C; opacity: 0.6; }
+.slot-time { width: 260px; color: #9990A0; font-size: 18px; }
+.slot-dj { flex: 1; color: #E8E0D4; font-size: 22px; font-weight: bold; }
+.slot-status {
+  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: bold;
+}
+.status-locked { background: #9B59B6; color: #FFF; }
+.status-pending { background: #F39C12; color: #FFF; }
+.status-cover { background: #3498DB; color: #FFF; }
+.status-open { background: #E74C3C; color: #FFF; }
+.footer {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 25px;
+  border-top: 2px solid rgba(244,196,48,0.3);
+}
+.footer-brand {
+  font-size: 16px;
+  color: #9990A0;
+  letter-spacing: 2px;
+}
+.footer-brand strong { color: #F4C430; }
+.footer-url { font-size: 14px; color: #666; margin-top: 8px; }
+.loading-msg {
+  text-align: center;
+  color: #9990A0;
+  font-size: 18px;
+  padding: 30px;
+}
+</style>
+</head>
+<body>
+
+<div class="flyer">
+  <div class="header">
+    <div class="brand-icon">&#127911;</div>
+    <div class="brand-name">Beats &amp; Bourbon</div>
+    <div class="tagline">Premium Saturday Sounds</div>
+    <div class="theme-name" id="theme-name"></div>
+  </div>
+
+  <div class="date-banner">
+    <div class="date-label">This Saturday</div>
+    <div class="date-value" id="date-value">Loading...</div>
+    <div class="time-range">12:00 PM &ndash; 12:00 AM ET</div>
+  </div>
+
+  <div class="lineup">
+    <div class="lineup-title">Full Lineup</div>
+    <div id="lineup-slots">
+      <div class="loading-msg">Loading schedule...</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-brand"><strong>Beats &amp; Bourbon</strong> &times; Reebootradio</div>
+    <div class="footer-url">reebootradio.com</div>
+  </div>
+</div>
+
+<script>
+// ===========================================================
+// CONFIG — Update GAS_URL to your deployed Apps Script /exec URL
+// ===========================================================
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbwBkmIae1QyhVvCvGJbTMWieKmgjYuS5-cODwJvDpFhVsv9lunxTnRYdVuX43m5LIOV/exec';
+
+// Weekly theme rotation (mirrors getWeeklyTheme() in Code.gs)
+var THEMES = [
+  'Vibes & Vinyl',
+  'Bass & Bourbon',
+  'Saturday Soul Sessions',
+  'The Golden Hour Mix',
+  'Late Night Grooves',
+  'Turntable Therapy',
+  'The Premium Pour',
+  'Rhythm & Rye'
+];
+
+function getWeeklyTheme() {
+  var weekNum = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
+  return THEMES[weekNum % THEMES.length];
+}
+
+// Compute the next Saturday date string (Eastern time)
+function getNextSaturdayStr() {
+  var etStr = new Date().toLocaleString('en-US', { timeZone: 'America/New_York' });
+  var et = new Date(etStr);
+  var day = et.getDay();
+  if (day !== 6) {
+    var daysUntil = (6 - day + 7) % 7;
+    et.setDate(et.getDate() + daysUntil);
+  }
+  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var months = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+  return days[et.getDay()] + ', ' + months[et.getMonth()] + ' ' + et.getDate() + ', ' + et.getFullYear();
+}
+
+function escapeHTML(str) {
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+}
+
+function renderSchedule(data) {
+  var theme = data.theme || getWeeklyTheme();
+  document.getElementById('theme-name').textContent = '\u201C' + theme + '\u201D';
+  document.getElementById('date-value').textContent = getNextSaturdayStr();
+
+  var slotsEl = document.getElementById('lineup-slots');
+  var schedule = data.schedule || [];
+
+  if (schedule.length === 0) {
+    slotsEl.innerHTML = '<div class="loading-msg">Schedule coming soon...</div>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < schedule.length; i++) {
+    var s = schedule[i];
+    var djDisplay = s.dj || 'OPEN';
+    var rowClass = 'slot-row';
+    var statusHTML = '';
+
+    if (s.status === 'LOCKED') {
+      rowClass += ' anchor';
+      statusHTML = '<span class="slot-status status-locked">ANCHOR</span>';
+    } else if (s.status === 'COVER') {
+      rowClass += ' filled';
+      statusHTML = '<span class="slot-status status-cover">COVER</span>';
+    } else if (s.status === 'UNFILLED' || !s.dj) {
+      rowClass += ' open';
+      djDisplay = 'OPEN';
+      statusHTML = '<span class="slot-status status-open">OPEN</span>';
+    } else {
+      rowClass += ' filled';
+      statusHTML = '<span class="slot-status status-pending">SET</span>';
+    }
+
+    html += '<div class="' + rowClass + '">';
+    html += '<div class="slot-time">' + escapeHTML(s.timeSlot) + '</div>';
+    html += '<div class="slot-dj">' + escapeHTML(djDisplay) + '</div>';
+    html += statusHTML;
+    html += '</div>';
+  }
+
+  slotsEl.innerHTML = html;
+}
+
+function fetchSchedule() {
+  fetch(GAS_URL + '?action=getSchedule')
+    .then(function(res) { return res.json(); })
+    .then(function(data) { renderSchedule(data); })
+    .catch(function(err) {
+      console.error('Fetch error:', err);
+      loadViaJSONP();
+    });
+}
+
+function loadViaJSONP() {
+  var callbackName = '_bbPromoCb_' + Date.now();
+  window[callbackName] = function(data) {
+    renderSchedule(data);
+    delete window[callbackName];
+    var script = document.getElementById('jsonp-promo');
+    if (script) script.remove();
+  };
+  var s = document.createElement('script');
+  s.id = 'jsonp-promo';
+  s.src = GAS_URL + '?action=getSchedule&callback=' + callbackName;
+  s.onerror = function() {
+    document.getElementById('lineup-slots').innerHTML = '<div class="loading-msg">Unable to load schedule</div>';
+  };
+  document.head.appendChild(s);
+}
+
+// Load schedule
+fetchSchedule();
+</script>
+</body>
+</html>

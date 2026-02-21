@@ -1,1 +1,176 @@
-404: Not Found
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Beats &amp; Bourbon &mdash; Horizontal Overlay</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: transparent;
+  overflow: hidden;
+}
+.overlay {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(90deg, #0D0B08 0%, #1A1A2E 50%, #0D0B08 100%);
+  padding: 24px 40px;
+  border-top: 6px solid #F4C430;
+  min-height: 160px;
+}
+.brand {
+  color: #F4C430;
+  font-size: 42px;
+  font-weight: bold;
+  margin-right: 50px;
+  white-space: nowrap;
+  text-shadow: 0 2px 8px rgba(244,196,48,0.3);
+}
+.slots {
+  display: flex;
+  gap: 28px;
+  overflow-x: auto;
+  flex: 1;
+  align-items: center;
+}
+.slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  padding: 14px 24px;
+  border-radius: 10px;
+}
+.slot.live {
+  background: rgba(244,196,48,0.2);
+  border: 3px solid #F4C430;
+  box-shadow: 0 0 12px rgba(244,196,48,0.3);
+}
+.slot.locked { border-left: 4px solid #9B59B6; }
+.slot.unfilled { opacity: 0.5; }
+.time { color: #9990A0; font-size: 26px; }
+.dj-name { color: #E8E0D4; font-size: 34px; font-weight: bold; }
+.live-badge {
+  background: #E74C3C;
+  color: #FFF;
+  font-size: 20px;
+  padding: 5px 12px;
+  border-radius: 5px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.loading { color: #9990A0; font-size: 26px; padding: 10px; }
+.error { color: #E74C3C; font-size: 26px; padding: 10px; }
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay">
+  <div class="brand">&#127911; Beats &amp; Bourbon</div>
+  <div class="slots" id="slots">
+    <div class="loading">Loading schedule...</div>
+  </div>
+</div>
+
+<script>
+// ===========================================================
+// CONFIG — Update GAS_URL to your deployed Apps Script /exec URL
+// ===========================================================
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbwBkmIae1QyhVvCvGJbTMWieKmgjYuS5-cODwJvDpFhVsv9lunxTnRYdVuX43m5LIOV/exec';
+
+function getET() {
+  var s = new Date().toLocaleString('en-US', { timeZone: 'America/New_York' });
+  return new Date(s);
+}
+
+function parseHour(t) {
+  var m = t.match(/(\d{1,2})(?::00)?\s*(AM|PM)/i);
+  if (!m) return -1;
+  var h = parseInt(m[1]), ap = m[2].toUpperCase();
+  if (ap === 'PM' && h !== 12) h += 12;
+  if (ap === 'AM' && h === 12) h = 0;
+  return h;
+}
+
+function renderSchedule(data) {
+  var slotsEl = document.getElementById('slots');
+  var schedule = data.schedule || [];
+  if (schedule.length === 0) {
+    slotsEl.innerHTML = '<div class="loading">No schedule available</div>';
+    return;
+  }
+
+  var et = getET();
+  var currentDay = et.getDay();
+  var currentHour = et.getHours();
+  var html = '';
+
+  for (var i = 0; i < schedule.length; i++) {
+    var s = schedule[i];
+    var djDisplay = s.dj || 'OPEN';
+    var statusClass = '';
+    if (s.status === 'LOCKED') statusClass = ' locked';
+    else if (s.status === 'UNFILLED' || !s.dj) statusClass = ' unfilled';
+
+    var isLive = false;
+    if (currentDay === 6) {
+      var slotStart = parseHour(s.timeSlot);
+      if (slotStart >= 0 && currentHour >= slotStart && currentHour < slotStart + 2) {
+        isLive = true;
+        statusClass = ' live';
+      }
+    }
+
+    html += '<div class="slot' + statusClass + '">';
+    html += '<div class="time">' + escapeHTML(s.timeSlot) + '</div>';
+    html += '<div class="dj-name">' + escapeHTML(djDisplay);
+    if (isLive) html += ' <span class="live-badge">LIVE</span>';
+    html += '</div>';
+    html += '</div>';
+  }
+
+  slotsEl.innerHTML = html;
+}
+
+function escapeHTML(str) {
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+}
+
+function fetchSchedule() {
+  fetch(GAS_URL + '?action=getSchedule')
+    .then(function(res) { return res.json(); })
+    .then(function(data) { renderSchedule(data); })
+    .catch(function(err) {
+      console.error('Fetch error:', err);
+      // JSONP fallback
+      loadViaJSONP();
+    });
+}
+
+function loadViaJSONP() {
+  var callbackName = '_bbScheduleCb_' + Date.now();
+  window[callbackName] = function(data) {
+    renderSchedule(data);
+    delete window[callbackName];
+    var script = document.getElementById('jsonp-schedule');
+    if (script) script.remove();
+  };
+  var s = document.createElement('script');
+  s.id = 'jsonp-schedule';
+  s.src = GAS_URL + '?action=getSchedule&callback=' + callbackName;
+  s.onerror = function() {
+    document.getElementById('slots').innerHTML = '<div class="error">Unable to load schedule</div>';
+  };
+  document.head.appendChild(s);
+}
+
+// Initial load
+fetchSchedule();
+
+// Auto-refresh every 60 seconds
+setInterval(fetchSchedule, 60000);
+</script>
+</body>
+</html>
