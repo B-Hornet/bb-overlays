@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Beats &amp; Bourbon &mdash; Vertical Overlay</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: transparent;
+  overflow: hidden;
+}
+.overlay {
+  background: linear-gradient(180deg, #0D0B08 0%, #1A1A2E 100%);
+  padding: 15px;
+  border-left: 3px solid #F4C430;
+  min-width: 280px;
+  max-width: 320px;
+}
+.brand {
+  color: #F4C430;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 5px;
+}
+.date {
+  color: #9990A0;
+  font-size: 12px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+.theme {
+  color: #F4C430;
+  font-size: 11px;
+  text-align: center;
+  margin-bottom: 15px;
+  font-style: italic;
+}
+.slot {
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border-radius: 4px;
+  border-left: 3px solid #333;
+}
+.slot.live {
+  border-left-color: #F4C430;
+  background: rgba(244,196,48,0.1);
+}
+.slot.locked { border-left-color: #9B59B6; }
+.slot.unfilled { border-left-color: #E74C3C; opacity: 0.5; }
+.time { color: #9990A0; font-size: 11px; }
+.dj-name {
+  color: #E8E0D4;
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 2px;
+}
+.live-badge {
+  background: #E74C3C;
+  color: #FFF;
+  font-size: 9px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  margin-left: 6px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.loading { color: #9990A0; font-size: 12px; text-align: center; padding: 20px 0; }
+.error { color: #E74C3C; font-size: 12px; text-align: center; padding: 20px 0; }
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay">
+  <div class="brand">&#127911; Beats &amp; Bourbon</div>
+  <div class="date" id="schedule-date">Loading...</div>
+  <div class="theme" id="schedule-theme"></div>
+  <div id="slots">
+    <div class="loading">Loading schedule...</div>
+  </div>
+</div>
+
+<script>
+// ===========================================================
+// CONFIG — Update GAS_URL to your deployed Apps Script /exec URL
+// ===========================================================
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbwBkmIae1QyhVvCvGJbTMWieKmgjYuS5-cODwJvDpFhVsv9lunxTnRYdVuX43m5LIOV/exec';
+
+// Weekly theme rotation (mirrors getWeeklyTheme() in Code.gs)
+var THEMES = [
+  'Vibes & Vinyl',
+  'Bass & Bourbon',
+  'Saturday Soul Sessions',
+  'The Golden Hour Mix',
+  'Beats on the Rocks',
+  'Late Night Grooves',
+  'Turntable Therapy',
+  'The Premium Pour',
+  'Rhythm & Rye'
+];
+
+function getWeeklyTheme() {
+  var weekNum = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
+  return THEMES[weekNum % THEMES.length];
+}
+
+function getET() {
+  var s = new Date().toLocaleString('en-US', { timeZone: 'America/New_York' });
+  return new Date(s);
+}
+
+function parseHour(t) {
+  var m = t.match(/(\d{1,2})(?::00)?\s*(AM|PM)/i);
+  if (!m) return -1;
+  var h = parseInt(m[1]), ap = m[2].toUpperCase();
+  if (ap === 'PM' && h !== 12) h += 12;
+  if (ap === 'AM' && h === 12) h = 0;
+  return h;
+}
+
+function escapeHTML(str) {
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+}
+
+function renderSchedule(data) {
+  var dateEl = document.getElementById('schedule-date');
+  var themeEl = document.getElementById('schedule-theme');
+  var slotsEl = document.getElementById('slots');
+
+  dateEl.textContent = data.date || 'TBD';
+  themeEl.textContent = getWeeklyTheme();
+
+  var schedule = data.schedule || [];
+  if (schedule.length === 0) {
+    slotsEl.innerHTML = '<div class="loading">No schedule available</div>';
+    return;
+  }
+
+  var et = getET();
+  var currentDay = et.getDay();
+  var currentHour = et.getHours();
+  var html = '';
+
+  for (var i = 0; i < schedule.length; i++) {
+    var s = schedule[i];
+    var djDisplay = s.dj || 'OPEN';
+    var statusClass = '';
+    if (s.status === 'LOCKED') statusClass = ' locked';
+    else if (s.status === 'UNFILLED' || !s.dj) statusClass = ' unfilled';
+
+    var isLive = false;
+    if (currentDay === 6) {
+      var slotStart = parseHour(s.timeSlot);
+      if (slotStart >= 0 && currentHour >= slotStart && currentHour < slotStart + 2) {
+        isLive = true;
+        statusClass = ' live';
+      }
+    }
+
+    html += '<div class="slot' + statusClass + '">';
+    html += '<div class="time">' + escapeHTML(s.timeSlot) + '</div>';
+    html += '<div class="dj-name">' + escapeHTML(djDisplay);
+    if (isLive) html += ' <span class="live-badge">LIVE</span>';
+    html += '</div>';
+    html += '</div>';
+  }
+
+  slotsEl.innerHTML = html;
+}
+
+function fetchSchedule() {
+  fetch(GAS_URL + '?action=getSchedule')
+    .then(function(res) { return res.json(); })
+    .then(function(data) { renderSchedule(data); })
+    .catch(function(err) {
+      console.error('Fetch error:', err);
+      loadViaJSONP();
+    });
+}
+
+function loadViaJSONP() {
+  var callbackName = '_bbScheduleCb_' + Date.now();
+  window[callbackName] = function(data) {
+    renderSchedule(data);
+    delete window[callbackName];
+    var script = document.getElementById('jsonp-schedule');
+    if (script) script.remove();
+  };
+  var s = document.createElement('script');
+  s.id = 'jsonp-schedule';
+  s.src = GAS_URL + '?action=getSchedule&callback=' + callbackName;
+  s.onerror = function() {
+    document.getElementById('slots').innerHTML = '<div class="error">Unable to load schedule</div>';
+  };
+  document.head.appendChild(s);
+}
+
+// Initial load
+fetchSchedule();
+
+// Auto-refresh every 60 seconds
+setInterval(fetchSchedule, 60000);
+</script>
+</body>
+</html>
