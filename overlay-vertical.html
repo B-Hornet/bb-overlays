@@ -130,7 +130,7 @@ function renderSchedule(data) {
   var slotsEl = document.getElementById('slots');
 
   dateEl.textContent = data.date || 'TBD';
-  themeEl.textContent = getWeeklyTheme();
+  themeEl.textContent = data.theme || getWeeklyTheme();
 
   var schedule = data.schedule || [];
   if (schedule.length === 0) {
