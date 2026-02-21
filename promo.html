@@ -1,196 +1,238 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Beats &amp; Bourbon &mdash; Weekly Promo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,700;0,900;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: "Segoe UI", Tahoma, sans-serif;
-  background: #0D0B08;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  padding: 20px;
-}
-.flyer {
-  width: 1080px;
-  min-height: 1080px;
-  background: linear-gradient(180deg, #0D0B08 0%, #1A1A2E 30%, #0D0B08 100%);
-  position: relative;
-  overflow: hidden;
-  padding: 60px 50px;
-}
-.flyer::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 6px;
-  background: linear-gradient(90deg, transparent, #F4C430, transparent);
-}
-.flyer::after {
-  content: "";
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 6px;
-  background: linear-gradient(90deg, transparent, #F4C430, transparent);
-}
-.header { text-align: center; margin-bottom: 40px; }
-.brand-icon { font-size: 60px; margin-bottom: 10px; }
-.brand-name {
-  font-size: 52px;
-  font-weight: 900;
-  color: #F4C430;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-}
-.tagline {
-  font-size: 20px;
-  color: #9990A0;
-  margin-top: 8px;
-  letter-spacing: 6px;
-  text-transform: uppercase;
-}
-.theme-name {
-  font-size: 24px;
-  color: #F4C430;
-  margin-top: 20px;
-  font-style: italic;
-  opacity: 0.8;
-}
-.date-banner {
-  text-align: center;
-  margin: 30px 0;
-  padding: 20px;
-  border-top: 2px solid rgba(244,196,48,0.3);
-  border-bottom: 2px solid rgba(244,196,48,0.3);
-}
-.date-label {
-  font-size: 14px;
-  color: #9990A0;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-}
-.date-value {
-  font-size: 32px;
-  color: #E8E0D4;
-  font-weight: bold;
-  margin-top: 5px;
-}
-.time-range {
-  font-size: 16px;
-  color: #9990A0;
-  margin-top: 5px;
-}
-.lineup { margin: 30px 0; }
-.lineup-title {
-  font-size: 16px;
-  color: #F4C430;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  text-align: center;
-  margin-bottom: 20px;
-}
-.slot-row {
-  display: flex;
-  align-items: center;
-  padding: 14px 20px;
-  margin-bottom: 4px;
-  border-radius: 6px;
-}
-.slot-row:nth-child(odd) { background: rgba(26,26,46,0.8); }
-.slot-row:nth-child(even) { background: rgba(13,11,8,0.6); }
-.slot-row.anchor { border-left: 4px solid #9B59B6; }
-.slot-row.filled { border-left: 4px solid #F4C430; }
-.slot-row.open { border-left: 4px solid #E74C3C; opacity: 0.6; }
-.slot-time { width: 260px; color: #9990A0; font-size: 18px; }
-.slot-dj { flex: 1; color: #E8E0D4; font-size: 22px; font-weight: bold; }
-.slot-status {
-  font-size: 13px;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-weight: bold;
-}
-.status-locked { background: #9B59B6; color: #FFF; }
-.status-pending { background: #F39C12; color: #FFF; }
-.status-cover { background: #3498DB; color: #FFF; }
-.status-open { background: #E74C3C; color: #FFF; }
-.footer {
-  text-align: center;
-  margin-top: 40px;
-  padding-top: 25px;
-  border-top: 2px solid rgba(244,196,48,0.3);
-}
-.footer-brand {
-  font-size: 16px;
-  color: #9990A0;
-  letter-spacing: 2px;
-}
-.footer-brand strong { color: #F4C430; }
-.footer-url { font-size: 14px; color: #666; margin-top: 8px; }
-.loading-msg {
-  text-align: center;
-  color: #9990A0;
-  font-size: 18px;
-  padding: 30px;
-}
+  :root {
+    --gold: #D4A843;
+    --gold-light: #F4C430;
+    --dark-bg: #0D0B08;
+    --cream: #F5F0E8;
+    --border: rgba(212,168,67,0.5);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #060608;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 80px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--cream);
+  }
+  /* ===== THE FLYER ===== */
+  .sq-flyer {
+    width: 1080px;
+    aspect-ratio: 1/1;
+    background: var(--dark-bg);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 2.5px solid var(--border);
+    border-radius: 2px;
+  }
+  /* Corner marks */
+  .cm { position: absolute; border-color: var(--border); border-style: solid; }
+  .cm.tl { top: 20px; left: 20px; width: 44px; height: 44px; border-width: 2px 0 0 2px; }
+  .cm.tr { top: 20px; right: 20px; width: 44px; height: 44px; border-width: 2px 2px 0 0; }
+  .cm.bl { bottom: 20px; left: 20px; width: 44px; height: 44px; border-width: 0 0 2px 2px; }
+  .cm.br { bottom: 20px; right: 20px; width: 44px; height: 44px; border-width: 0 2px 2px 0; }
+  /* Brand header */
+  .sq-brand {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    padding: 6% 7% 0;
+    gap: 5%;
+  }
+  .emblem-ring {
+    width: 120px;
+    height: 120px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .emblem-ring::before {
+    content: '';
+    position: absolute;
+    width: calc(100% + 14px);
+    height: calc(100% + 14px);
+    border: 1px solid rgba(212,168,67,0.22);
+    border-radius: 50%;
+  }
+  .emblem-text {
+    font-family: 'Bodoni Moda', serif;
+    color: var(--cream);
+    text-align: center;
+    line-height: 1.15;
+    letter-spacing: 2px;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .e-amp {
+    color: var(--gold);
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    letter-spacing: 0;
+    font-size: 0.8em;
+  }
+  .sq-brand-text { display: flex; flex-direction: column; }
+  .brand-name {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 56px;
+    font-weight: 900;
+    color: var(--cream);
+    letter-spacing: 2px;
+    line-height: 1.05;
+  }
+  .brand-amp {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--gold);
+    font-size: 0.7em;
+  }
+  .brand-date {
+    font-size: 18px;
+    color: var(--gold);
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 10px;
+  }
+  .brand-tagline {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: rgba(212,168,67,0.5);
+    margin-top: 8px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  /* Divider */
+  .sq-divider {
+    width: 86%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold), rgba(212,168,67,0.15));
+    margin: 4% 7%;
+  }
+  /* Lineup rows */
+  .sq-lineup {
+    flex: 1;
+    padding: 0 7% 5%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .sq-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .sq-row:last-child { border-bottom: none; }
+  .sq-slot {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1.5px;
+    color: var(--cream);
+    text-transform: uppercase;
+    font-weight: 600;
+    min-width: 35%;
+  }
+  .sq-dj {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 36px;
+    color: var(--gold);
+    font-weight: 700;
+    text-align: right;
+  }
+  .sq-dj.open {
+    color: rgba(245,240,232,0.12);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 28px;
+  }
+  .sq-dj.anchor {
+    color: var(--gold);
+  }
+  .sq-anchor-mark {
+    font-size: 14px;
+    color: rgba(212,168,67,0.5);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-left: 8px;
+  }
+  /* Bottom */
+  .sq-bottom {
+    flex: 0 0 auto;
+    padding: 0 7% 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sq-tagline {
+    font-size: 14px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.2);
+  }
+  .sq-stream-label {
+    font-size: 14px;
+    color: rgba(212,168,67,0.4);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .loading-msg {
+    text-align: center;
+    color: rgba(245,240,232,0.3);
+    font-size: 20px;
+    padding: 40px;
+    font-style: italic;
+  }
 </style>
 </head>
 <body>
 
-<div class="flyer">
-  <div class="header">
-    <div class="brand-icon">&#127911;</div>
-    <div class="brand-name">Beats &amp; Bourbon</div>
-    <div class="tagline">Premium Saturday Sounds</div>
-    <div class="theme-name" id="theme-name"></div>
-  </div>
-
-  <div class="date-banner">
-    <div class="date-label">This Saturday</div>
-    <div class="date-value" id="date-value">Loading...</div>
-    <div class="time-range">12:00 PM &ndash; 12:00 AM ET</div>
-  </div>
-
-  <div class="lineup">
-    <div class="lineup-title">Full Lineup</div>
-    <div id="lineup-slots">
-      <div class="loading-msg">Loading schedule...</div>
+<div class="sq-flyer">
+  <div class="cm tl"></div>
+  <div class="cm tr"></div>
+  <div class="cm bl"></div>
+  <div class="cm br"></div>
+  <div class="sq-brand">
+    <div class="emblem-ring">
+      <div class="emblem-text">BEATS<br><span class="e-amp">&amp;</span><br>BOURBON</div>
+    </div>
+    <div class="sq-brand-text">
+      <div class="brand-name">BEATS <span class="brand-amp">&amp;</span> BOURBON</div>
+      <div class="brand-date" id="brand-date">Loading...</div>
+      <div class="brand-tagline">Premium Saturday Sounds</div>
     </div>
   </div>
-
-  <div class="footer">
-    <div class="footer-brand"><strong>Beats &amp; Bourbon</strong> &times; Reebootradio</div>
-    <div class="footer-url">reebootradio.com</div>
+  <div class="sq-divider"></div>
+  <div class="sq-lineup" id="lineup-slots">
+    <div class="loading-msg">Loading schedule...</div>
+  </div>
+  <div class="sq-bottom">
+    <span class="sq-tagline">Premium Saturday Sounds</span>
+    <span class="sq-stream-label">Reebootradio LLC</span>
   </div>
 </div>
 
 <script>
-// ===========================================================
-// CONFIG — Update GAS_URL to your deployed Apps Script /exec URL
-// ===========================================================
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbwBkmIae1QyhVvCvGJbTMWieKmgjYuS5-cODwJvDpFhVsv9lunxTnRYdVuX43m5LIOV/exec';
 
-// Weekly theme rotation (mirrors getWeeklyTheme() in Code.gs)
-var THEMES = [
-  'Vibes & Vinyl',
-  'Bass & Bourbon',
-  'Saturday Soul Sessions',
-  'The Golden Hour Mix',
-  'Late Night Grooves',
-  'Turntable Therapy',
-  'The Premium Pour',
-  'Rhythm & Rye'
-];
-
-function getWeeklyTheme() {
-  var weekNum = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
-  return THEMES[weekNum % THEMES.length];
-}
-
-// Compute the next Saturday date string (Eastern time)
 function getNextSaturdayStr() {
   var etStr = new Date().toLocaleString('en-US', { timeZone: 'America/New_York' });
   var et = new Date(etStr);
@@ -199,10 +241,23 @@ function getNextSaturdayStr() {
     var daysUntil = (6 - day + 7) % 7;
     et.setDate(et.getDate() + daysUntil);
   }
-  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var months = ['January','February','March','April','May','June',
                 'July','August','September','October','November','December'];
-  return days[et.getDay()] + ', ' + months[et.getMonth()] + ' ' + et.getDate() + ', ' + et.getFullYear();
+  return 'Saturday \u2014 ' + months[et.getMonth()] + ' ' + et.getDate() + ', ' + et.getFullYear();
+}
+
+// Shorten "12:00 PM - 2:00 PM" to "12 PM \u2013 2 PM"
+function shortTime(t) {
+  var parts = t.split(/\s*[-\u2013]\s*/);
+  if (parts.length !== 2) return t;
+  var startMatch = parts[0].match(/(\d{1,2})(?::00)?\s*(AM|PM)/i);
+  var endMatch = parts[1].match(/(\d{1,2})(?::00)?\s*(AM|PM)/i);
+  if (!startMatch || !endMatch) return t;
+  return startMatch[1] + ' ' + startMatch[2].toUpperCase() + ' \u2013 ' + endMatch[1] + ' ' + endMatch[2].toUpperCase();
+}
+
+function cleanDJName(name) {
+  return name.replace(/\s*\(Anchor\)/i, '');
 }
 
 function escapeHTML(str) {
@@ -212,9 +267,7 @@ function escapeHTML(str) {
 }
 
 function renderSchedule(data) {
-  var theme = data.theme || getWeeklyTheme();
-  document.getElementById('theme-name').textContent = '\u201C' + theme + '\u201D';
-  document.getElementById('date-value').textContent = getNextSaturdayStr();
+  document.getElementById('brand-date').textContent = getNextSaturdayStr();
 
   var slotsEl = document.getElementById('lineup-slots');
   var schedule = data.schedule || [];
@@ -227,29 +280,21 @@ function renderSchedule(data) {
   var html = '';
   for (var i = 0; i < schedule.length; i++) {
     var s = schedule[i];
-    var djDisplay = s.dj || 'OPEN';
-    var rowClass = 'slot-row';
-    var statusHTML = '';
+    var djDisplay = s.dj ? cleanDJName(s.dj) : '';
+    var isOpen = !s.dj || s.status === 'UNFILLED';
+    var isAnchor = s.status === 'LOCKED';
 
-    if (s.status === 'LOCKED') {
-      rowClass += ' anchor';
-      statusHTML = '<span class="slot-status status-locked">ANCHOR</span>';
-    } else if (s.status === 'COVER') {
-      rowClass += ' filled';
-      statusHTML = '<span class="slot-status status-cover">COVER</span>';
-    } else if (s.status === 'UNFILLED' || !s.dj) {
-      rowClass += ' open';
-      djDisplay = 'OPEN';
-      statusHTML = '<span class="slot-status status-open">OPEN</span>';
+    html += '<div class="sq-row">';
+    html += '<span class="sq-slot">' + escapeHTML(shortTime(s.timeSlot)) + '</span>';
+
+    if (isOpen) {
+      html += '<span class="sq-dj open">\u2014 Open \u2014</span>';
     } else {
-      rowClass += ' filled';
-      statusHTML = '<span class="slot-status status-pending">SET</span>';
+      html += '<span class="sq-dj' + (isAnchor ? ' anchor' : '') + '">' + escapeHTML(djDisplay);
+      if (isAnchor) html += '<span class="sq-anchor-mark">\u2605</span>';
+      html += '</span>';
     }
 
-    html += '<div class="' + rowClass + '">';
-    html += '<div class="slot-time">' + escapeHTML(s.timeSlot) + '</div>';
-    html += '<div class="slot-dj">' + escapeHTML(djDisplay) + '</div>';
-    html += statusHTML;
     html += '</div>';
   }
 
@@ -283,7 +328,6 @@ function loadViaJSONP() {
   document.head.appendChild(s);
 }
 
-// Load schedule
 fetchSchedule();
 </script>
 </body>

@@ -1,81 +1,202 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <title>Beats &amp; Bourbon &mdash; Horizontal Overlay</title>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;700;900&family=Playfair+Display:ital@1&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: "Segoe UI", Tahoma, sans-serif;
-  background: transparent;
-  overflow: hidden;
-}
-.overlay {
-  display: flex;
-  align-items: center;
-  background: linear-gradient(90deg, #0D0B08 0%, #1A1A2E 50%, #0D0B08 100%);
-  padding: 24px 40px;
-  border-top: 6px solid #F4C430;
-  min-height: 160px;
-}
-.brand {
-  color: #F4C430;
-  font-size: 42px;
-  font-weight: bold;
-  margin-right: 50px;
-  white-space: nowrap;
-  text-shadow: 0 2px 8px rgba(244,196,48,0.3);
-}
-.slots {
-  display: flex;
-  gap: 28px;
-  overflow-x: auto;
-  flex: 1;
-  align-items: center;
-}
-.slot {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  white-space: nowrap;
-  padding: 14px 24px;
-  border-radius: 10px;
-}
-.slot.live {
-  background: rgba(244,196,48,0.2);
-  border: 3px solid #F4C430;
-  box-shadow: 0 0 12px rgba(244,196,48,0.3);
-}
-.slot.locked { border-left: 4px solid #9B59B6; }
-.slot.unfilled { opacity: 0.5; }
-.time { color: #9990A0; font-size: 26px; }
-.dj-name { color: #E8E0D4; font-size: 34px; font-weight: bold; }
-.live-badge {
-  background: #E74C3C;
-  color: #FFF;
-  font-size: 20px;
-  padding: 5px 12px;
-  border-radius: 5px;
-  animation: pulse 2s infinite;
-}
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-.loading { color: #9990A0; font-size: 26px; padding: 10px; }
-.error { color: #E74C3C; font-size: 26px; padding: 10px; }
+  :root {
+    --gold: #D4A843;
+    --gold-light: #F4C430;
+    --dark-bg: #0D0B08;
+    --cream: #F5F0E8;
+    --border: rgba(212,168,67,0.5);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: transparent;
+    overflow: hidden;
+  }
+  .overlay {
+    display: flex;
+    align-items: center;
+    background: var(--dark-bg);
+    border-top: 2px solid var(--gold);
+    padding: 10px 28px;
+    min-height: 110px;
+    position: relative;
+  }
+  .overlay::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212,168,67,0.3), transparent);
+  }
+  /* Brand emblem */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-right: 24px;
+    flex-shrink: 0;
+  }
+  .emblem-ring {
+    width: 56px;
+    height: 56px;
+    border: 1.5px solid var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .emblem-ring::before {
+    content: '';
+    position: absolute;
+    width: calc(100% + 10px);
+    height: calc(100% + 10px);
+    border: 1px solid rgba(212,168,67,0.15);
+    border-radius: 50%;
+  }
+  .emblem-text {
+    font-family: 'Bodoni Moda', serif;
+    color: var(--cream);
+    text-align: center;
+    line-height: 1.15;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    font-size: 7px;
+  }
+  .e-amp {
+    color: var(--gold);
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    letter-spacing: 0;
+    font-size: 0.85em;
+  }
+  .brand-info {
+    display: flex;
+    flex-direction: column;
+  }
+  .brand-name {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--cream);
+    letter-spacing: 1.5px;
+    line-height: 1.1;
+  }
+  .brand-name .amp {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--gold);
+    font-size: 0.75em;
+  }
+  .brand-tagline {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    color: rgba(212,168,67,0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  /* Divider */
+  .divider {
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(180deg, transparent, var(--gold), transparent);
+    margin-right: 20px;
+    flex-shrink: 0;
+  }
+  /* Slots */
+  .slots {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+  .slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    flex: 1;
+    max-width: 240px;
+    border-bottom: 2px solid transparent;
+  }
+  .slot.locked {
+    border-bottom-color: var(--gold);
+  }
+  .slot.unfilled {
+    opacity: 0.3;
+  }
+  .slot.live {
+    background: rgba(212,168,67,0.1);
+    border: 1px solid var(--gold);
+    border-bottom: 2px solid var(--gold);
+  }
+  .time {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: rgba(245,240,232,0.5);
+    text-transform: uppercase;
+  }
+  .dj-name {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+  .dj-name.open {
+    color: rgba(245,240,232,0.12);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 16px;
+  }
+  .live-badge {
+    background: #C0392B;
+    color: #FFF;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 1.5px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .loading { color: rgba(245,240,232,0.3); font-size: 16px; padding: 10px; font-style: italic; }
+  .error { color: #C0392B; font-size: 16px; padding: 10px; }
 </style>
 </head>
 <body>
 <div class="overlay" id="overlay">
-  <div class="brand">&#127911; Beats &amp; Bourbon</div>
+  <div class="brand">
+    <div class="emblem-ring">
+      <div class="emblem-text">BEATS<br><span class="e-amp">&amp;</span><br>BOURBON</div>
+    </div>
+    <div class="brand-info">
+      <div class="brand-name">BEATS <span class="amp">&amp;</span> BOURBON</div>
+      <div class="brand-tagline">Premium Saturday Sounds</div>
+    </div>
+  </div>
+  <div class="divider"></div>
   <div class="slots" id="slots">
     <div class="loading">Loading schedule...</div>
   </div>
 </div>
 
 <script>
-// ===========================================================
-// CONFIG — Update GAS_URL to your deployed Apps Script /exec URL
-// ===========================================================
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbwBkmIae1QyhVvCvGJbTMWieKmgjYuS5-cODwJvDpFhVsv9lunxTnRYdVuX43m5LIOV/exec';
 
 function getET() {
@@ -90,6 +211,27 @@ function parseHour(t) {
   if (ap === 'PM' && h !== 12) h += 12;
   if (ap === 'AM' && h === 12) h = 0;
   return h;
+}
+
+function shortTime(t) {
+  var parts = t.split(/\s*[-\u2013]\s*/);
+  if (parts.length !== 2) return t;
+  var startMatch = parts[0].match(/(\d{1,2})(?::00)?\s*(AM|PM)/i);
+  var endMatch = parts[1].match(/(\d{1,2})(?::00)?\s*(AM|PM)/i);
+  if (!startMatch || !endMatch) return t;
+  var sAP = startMatch[2].toUpperCase(), eAP = endMatch[2].toUpperCase();
+  if (sAP === eAP) return startMatch[1] + '\u2013' + endMatch[1] + ' ' + eAP;
+  return startMatch[1] + ' ' + sAP + '\u2013' + endMatch[1] + ' ' + eAP;
+}
+
+function cleanDJName(name) {
+  return name.replace(/\s*\(Anchor\)/i, '');
+}
+
+function escapeHTML(str) {
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
 }
 
 function renderSchedule(data) {
@@ -107,10 +249,11 @@ function renderSchedule(data) {
 
   for (var i = 0; i < schedule.length; i++) {
     var s = schedule[i];
-    var djDisplay = s.dj || 'OPEN';
+    var djDisplay = s.dj ? cleanDJName(s.dj) : '';
+    var isOpen = !s.dj || s.status === 'UNFILLED';
     var statusClass = '';
     if (s.status === 'LOCKED') statusClass = ' locked';
-    else if (s.status === 'UNFILLED' || !s.dj) statusClass = ' unfilled';
+    else if (isOpen) statusClass = ' unfilled';
 
     var isLive = false;
     if (currentDay === 6) {
@@ -122,20 +265,18 @@ function renderSchedule(data) {
     }
 
     html += '<div class="slot' + statusClass + '">';
-    html += '<div class="time">' + escapeHTML(s.timeSlot) + '</div>';
-    html += '<div class="dj-name">' + escapeHTML(djDisplay);
-    if (isLive) html += ' <span class="live-badge">LIVE</span>';
-    html += '</div>';
+    html += '<div class="time">' + escapeHTML(shortTime(s.timeSlot)) + '</div>';
+    if (isOpen) {
+      html += '<div class="dj-name open">Open</div>';
+    } else {
+      html += '<div class="dj-name">' + escapeHTML(djDisplay);
+      if (isLive) html += ' <span class="live-badge">LIVE</span>';
+      html += '</div>';
+    }
     html += '</div>';
   }
 
   slotsEl.innerHTML = html;
-}
-
-function escapeHTML(str) {
-  var div = document.createElement('div');
-  div.appendChild(document.createTextNode(str));
-  return div.innerHTML;
 }
 
 function fetchSchedule() {
@@ -144,7 +285,6 @@ function fetchSchedule() {
     .then(function(data) { renderSchedule(data); })
     .catch(function(err) {
       console.error('Fetch error:', err);
-      // JSONP fallback
       loadViaJSONP();
     });
 }
@@ -166,10 +306,7 @@ function loadViaJSONP() {
   document.head.appendChild(s);
 }
 
-// Initial load
 fetchSchedule();
-
-// Auto-refresh every 60 seconds
 setInterval(fetchSchedule, 60000);
 </script>
 </body>
