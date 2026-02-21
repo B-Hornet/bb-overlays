@@ -213,7 +213,8 @@ function escapeHTML(str) {
 }
 
 function renderSchedule(data) {
-  document.getElementById('theme-name').textContent = '\u201C' + getWeeklyTheme() + '\u201D';
+  var theme = data.theme || getWeeklyTheme();
+  document.getElementById('theme-name').textContent = '\u201C' + theme + '\u201D';
   document.getElementById('date-value').textContent = getNextSaturdayStr();
 
   var slotsEl = document.getElementById('lineup-slots');
