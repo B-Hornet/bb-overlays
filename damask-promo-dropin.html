@@ -1,0 +1,305 @@
+<!-- ============================================================
+  BB DAMASK BACKGROUND — DROP-IN FOR promo.html
+  
+  USAGE:
+  1. Add <canvas id="bb-bg"> immediately after <body> opens
+  2. Paste the <style> block into your existing <style> section
+  3. Paste the <script> block before your closing </body>
+  4. Call:  BBDamask.render('purple')   ← on page load
+            BBDamask.render(theme)      ← whenever theme changes
+  
+  THEME VALUES: 'classic' | 'midnight' | 'crimson' | 'sunset' | 'purple'
+  ============================================================ -->
+
+
+<!-- ── STEP 1: ADD THIS CANVAS ELEMENT ───────────────────────
+     Place immediately after <body> opens, before all other content.
+     It sits behind everything via position:fixed + z-index:-1       -->
+
+<canvas id="bb-bg"></canvas>
+
+
+<!-- ── STEP 2: ADD TO YOUR <style> BLOCK ─────────────────── -->
+<style>
+#bb-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: -1;
+  /* Canvas draws at 1080×1080 internally, CSS scales to viewport */
+}
+</style>
+
+
+<!-- ── STEP 3: ADD BEFORE </body> ────────────────────────── -->
+<script>
+const BBDamask = (() => {
+
+  /* ── THEME DEFINITIONS ────────────────────────────────────
+     bg[0] = center-top highlight, bg[1] = corner dark
+     r[0]  = darkest motif shadow
+     r[1]  = dark motif base
+     r[2]  = mid motif warm
+     r[3]  = light motif accent
+     r[4]  = lightest motif highlight
+  ──────────────────────────────────────────────────────── */
+  const THEMES = {
+    classic:  {
+      bg: ['#1C0B02', '#0C0500'],
+      r:  ['#41220D', '#7A4820', '#9D6632', '#D4A850', '#FDF4E0']
+    },
+    midnight: {
+      bg: ['#02060E', '#010308'],
+      r:  ['#0A1A3A', '#152E60', '#1A4080', '#6090D0', '#C0D8F8']
+    },
+    crimson:  {
+      bg: ['#0E0202', '#050001'],
+      r:  ['#3A0808', '#680F0F', '#901818', '#D04040', '#F8C0C0']
+    },
+    sunset:   {
+      bg: ['#0E0802', '#050300'],
+      r:  ['#3A1A04', '#702808', '#A04010', '#E07030', '#F8C090']
+    },
+    purple:   {
+      bg: ['#06010E', '#02000A'],
+      r:  ['#1A0632', '#3A1468', '#5C28A0', '#B878E8', '#E0C0F8']
+    }
+  };
+
+  /* ── TILE SPEC (from BB_FLYER_SYSTEM.md) ─────────────────
+     118×112px, brick-offset (odd rows shift TW/2), alpha 0.90  */
+  const TW = 118, TH = 112;
+  const CANVAS_SIZE = 1080;
+
+  /* ── HELPERS ─────────────────────────────────────────── */
+  function wa(hex, a) {
+    const r = parseInt(hex.slice(1,3), 16);
+    const g = parseInt(hex.slice(3,5), 16);
+    const b = parseInt(hex.slice(5,7), 16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  function radialGrad(ctx, cx, cy, r0, r1, ramp) {
+    const g = ctx.createRadialGradient(cx, cy, r0, cx, cy, r1);
+    g.addColorStop(0,    ramp[4]);
+    g.addColorStop(0.30, ramp[3]);
+    g.addColorStop(0.60, ramp[2]);
+    g.addColorStop(0.85, ramp[1]);
+    g.addColorStop(1,    ramp[0]);
+    return g;
+  }
+
+  /* ── MOTIF DRAW (11-part botanical anatomy) ──────────────
+     Called with ctx translated to tile center, no scaling.
+     All coordinates relative to (0,0) at motif center.         */
+  function drawMotif(ctx, ramp) {
+
+    /* PETAL — pointed bezier blade radiating from y=-28 toward tip */
+    function petal(tx, ty, hw) {
+      const bx = tx * 0.12;
+      const ht = ty + 28;
+      ctx.beginPath();
+      ctx.moveTo(-bx, -28);
+      ctx.bezierCurveTo(-hw, -28 + ht * 0.30, tx - hw * 0.5, ty - ht * 0.35, tx, ty);
+      ctx.bezierCurveTo( tx + hw * 0.5, ty - ht * 0.35,  hw, -28 + ht * 0.30, bx, -28);
+      ctx.closePath();
+      ctx.fillStyle = radialGrad(ctx, tx * 0.4, ty + Math.abs(ht) * 0.35, 0, Math.abs(ht) * 0.65, ramp);
+      ctx.fill();
+    }
+
+    /* WING — one acanthus leaf (right-upper orientation).
+       Mirror with ctx.scale(-1,1) / ctx.scale(1,-1) for other three. */
+    function wing() {
+      // Primary lobe — pointed bezier silhouette, NOT an arc
+      ctx.beginPath();
+      ctx.moveTo(4, -20);
+      ctx.bezierCurveTo(14, -28, 32, -24, 44, -15);
+      ctx.bezierCurveTo(40, -10, 24,  -7,  6, -10);
+      ctx.closePath();
+      ctx.fillStyle = radialGrad(ctx, 24, -17, 0, 26, ramp);
+      ctx.fill();
+
+      // Secondary lobe (lower acanthus curl)
+      ctx.beginPath();
+      ctx.moveTo(5, -10);
+      ctx.bezierCurveTo(14, -16, 28, -11, 36, -5);
+      ctx.bezierCurveTo(28,  -1, 14,   0,  5, -3);
+      ctx.closePath();
+      ctx.fillStyle = radialGrad(ctx, 18, -7, 0, 20, ramp);
+      ctx.fill();
+
+      // Botanical vein stroke — single bezier line along primary lobe
+      ctx.beginPath();
+      ctx.moveTo(5, -14);
+      ctx.bezierCurveTo(20, -17, 36, -14, 44, -15);
+      ctx.strokeStyle = ramp[3];
+      ctx.lineWidth   = 0.9;
+      ctx.setLineDash([]);
+      ctx.stroke();
+    }
+
+    // 1 & 2. OUTER OVAL FRAME — 2 concentric ellipses
+    ctx.strokeStyle = ramp[2]; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.ellipse(0, 0, 44, 52, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = ramp[1]; ctx.lineWidth = 0.7;
+    ctx.beginPath(); ctx.ellipse(0, 0, 38, 46, 0, 0, Math.PI * 2); ctx.stroke();
+
+    // 3. CROWN — 5 petals radiating upward from y=-28
+    petal( 0,  -50, 2.5);  // center spike
+    petal(-8,  -46, 3.5);  // inner left
+    petal( 8,  -46, 3.5);  // inner right
+    petal(-16, -42, 4.5);  // outer left
+    petal( 16, -42, 4.5);  // outer right
+
+    // 4. BASE — mirror of crown (scale y=-1 to flip downward)
+    ctx.save(); ctx.scale(1, -1);
+    petal( 0,  -50, 2.5);
+    petal(-8,  -46, 3.5); petal( 8, -46, 3.5);
+    petal(-16, -42, 4.5); petal(16, -42, 4.5);
+    ctx.restore();
+
+    // 5. TOP COLLAR — ellipse just below crown base
+    ctx.beginPath(); ctx.ellipse(0, -32, 9, 5, 0, 0, Math.PI * 2);
+    ctx.fillStyle = radialGrad(ctx, 0, -32, 0, 10, ramp); ctx.fill();
+
+    // 6. BOTTOM COLLAR — mirror of top
+    ctx.beginPath(); ctx.ellipse(0, 32, 9, 5, 0, 0, Math.PI * 2);
+    ctx.fillStyle = radialGrad(ctx, 0, 32, 0, 10, ramp); ctx.fill();
+
+    // 7. BODY COLUMN — narrow vertical rectangle with linear gradient
+    ctx.beginPath(); ctx.roundRect(-3, -28, 6, 56, 2);
+    const colGrad = ctx.createLinearGradient(-3, 0, 3, 0);
+    colGrad.addColorStop(0,   ramp[0]);
+    colGrad.addColorStop(0.5, ramp[3]);
+    colGrad.addColorStop(1,   ramp[0]);
+    ctx.fillStyle = colGrad; ctx.fill();
+
+    // 8-11. FOUR ACANTHUS WINGS (right-up, left-up, right-down, left-down)
+    wing();
+    ctx.save(); ctx.scale(-1,  1); wing(); ctx.restore();  // left-upper
+    ctx.save(); ctx.scale( 1, -1); wing(); ctx.restore();  // right-lower
+    ctx.save(); ctx.scale(-1, -1); wing(); ctx.restore();  // left-lower
+
+    // 12a. WAIST ELLIPSE — center horizontal accent
+    ctx.beginPath(); ctx.ellipse(0, 0, 6, 4, 0, 0, Math.PI * 2);
+    ctx.fillStyle = radialGrad(ctx, 0, 0, 0, 7, ramp); ctx.fill();
+
+    // 12b. SIDE OVALS — flanking the waist
+    [-13, 13].forEach(x => {
+      ctx.beginPath(); ctx.ellipse(x, 0, 4, 3, 0, 0, Math.PI * 2);
+      ctx.fillStyle = radialGrad(ctx, x, 0, 0, 6, ramp); ctx.fill();
+    });
+
+    // 13. CENTER JEWEL — 3 concentric layers: outer glow, dark recess, bright dot
+    ctx.beginPath(); ctx.ellipse(0, 0, 7, 7, 0, 0, Math.PI * 2);
+    ctx.fillStyle = wa(ramp[2], 0.55); ctx.fill();           // outer glow
+    ctx.beginPath(); ctx.ellipse(0, 0, 4, 4, 0, 0, Math.PI * 2);
+    ctx.fillStyle = ramp[0]; ctx.fill();                      // dark recess
+    ctx.beginPath(); ctx.ellipse(0, 0, 2, 2, 0, 0, Math.PI * 2);
+    ctx.fillStyle = ramp[4]; ctx.fill();                      // inner bright dot
+  }
+
+  /* ── TILE LAYER ───────────────────────────────────────────
+     Fills canvas W×H with brick-offset tile grid at globalAlpha 0.90 */
+  function drawDamaskLayer(ctx, W, H, ramp) {
+    ctx.save();
+    ctx.globalAlpha = 0.90;
+
+    const cols = Math.ceil(W / TW) + 2;
+    const rows = Math.ceil(H / TH) + 2;
+
+    for (let row = -1; row < rows; row++) {
+      const xOff = (row % 2 !== 0) ? TW / 2 : 0;
+      for (let col = -1; col < cols; col++) {
+        ctx.save();
+        ctx.translate(col * TW + xOff + TW / 2, row * TH + TH / 2);
+        drawMotif(ctx, ramp);
+        ctx.restore();
+      }
+    }
+    ctx.restore();
+  }
+
+  /* ── FILM GRAIN ──────────────────────────────────────── */
+  function applyGrain(ctx, W, H) {
+    const imgd = ctx.getImageData(0, 0, W, H);
+    const d    = imgd.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const n = (Math.random() - 0.5) * 16;
+      d[i] += n; d[i+1] += n; d[i+2] += n;
+    }
+    ctx.putImageData(imgd, 0, 0);
+  }
+
+  /* ── PUBLIC: render(themeName) ────────────────────────── */
+  function render(themeName) {
+    const key    = (themeName || 'classic').toLowerCase();
+    const theme  = THEMES[key] || THEMES.classic;
+    const canvas = document.getElementById('bb-bg');
+    if (!canvas) return;
+
+    canvas.width  = CANVAS_SIZE;
+    canvas.height = CANVAS_SIZE;
+
+    const ctx = canvas.getContext('2d');
+    const W   = CANVAS_SIZE;
+    const H   = CANVAS_SIZE;
+    const {bg, r} = theme;
+
+    // Layer 1: radial gradient base (bright center-top → dark corners)
+    const base = ctx.createRadialGradient(W * .5, H * .3, 0, W * .5, H * .5, W * .8);
+    base.addColorStop(0, bg[0]);
+    base.addColorStop(1, bg[1]);
+    ctx.fillStyle = base;
+    ctx.fillRect(0, 0, W, H);
+
+    // Layer 2: damask tile (globalAlpha 0.90 inside)
+    drawDamaskLayer(ctx, W, H, r);
+
+    // Layer 3: top center bloom
+    const bloom = ctx.createRadialGradient(W * .5, 0, 0, W * .5, 0, W * .6);
+    bloom.addColorStop(0, wa(r[2], 0.32));
+    bloom.addColorStop(1, wa(r[2], 0));
+    ctx.fillStyle = bloom;
+    ctx.fillRect(0, 0, W, H);
+
+    // Layer 4: vignette (dark corners)
+    const vig = ctx.createRadialGradient(W * .5, H * .5, W * .18, W * .5, H * .5, W * .78);
+    vig.addColorStop(0, 'transparent');
+    vig.addColorStop(1, 'rgba(0,0,0,0.72)');
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, W, H);
+
+    // Layer 5: bottom fade (last 30% of canvas height)
+    const btm = ctx.createLinearGradient(0, H * .68, 0, H);
+    btm.addColorStop(0, 'transparent');
+    btm.addColorStop(1, 'rgba(0,0,0,0.55)');
+    ctx.fillStyle = btm;
+    ctx.fillRect(0, 0, W, H);
+
+    // Layer 6: film grain (applied last, over everything)
+    applyGrain(ctx, W, H);
+  }
+
+  return { render };
+
+})();
+
+
+/* ── INIT ────────────────────────────────────────────────────
+   Call this wherever you currently set the active theme.
+   If you fetch theme from GAS, call after the fetch resolves:
+
+     fetch(GAS_URL + '?action=getTheme')
+       .then(r => r.json())
+       .then(d => BBDamask.render(d.theme));
+
+   Or call directly if theme is known at page load:
+
+     BBDamask.render('purple');
+──────────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  // REPLACE 'classic' with however you currently resolve the active theme
+  BBDamask.render('classic');
+});
+</script>
