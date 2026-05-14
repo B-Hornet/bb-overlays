@@ -208,7 +208,39 @@
   z-index: -1;
   /* Canvas draws at 1080×1080 internally, CSS scales to viewport */
 }
+
+/* Upload-to-Drive control bar — only visible below the flyer */
+.upload-bar {
+  margin: 30px auto;
+  text-align: center;
+  font-family: 'DM Sans', sans-serif;
+}
+.upload-bar button {
+  background: var(--gold, #D4A843);
+  color: #0D0B08;
+  border: none;
+  padding: 14px 36px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  font-family: inherit;
+}
+.upload-bar button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.upload-bar .status {
+  margin-top: 14px;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  color: #999;
+  min-height: 18px;
+}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 <canvas id="bb-bg"></canvas>
@@ -236,6 +268,11 @@
     <span class="sq-tagline">Premium Saturday Sounds</span>
     <span class="sq-stream-label">Reebootradio LLC</span>
   </div>
+</div>
+
+<div class="upload-bar">
+  <button id="upload-btn" type="button" onclick="uploadFlyerToDrive()">Upload to Drive</button>
+  <div id="upload-status" class="status"></div>
 </div>
 
 <script>
@@ -607,6 +644,63 @@ document.addEventListener('DOMContentLoaded', () => {
   // REPLACE 'classic' with however you currently resolve the active theme
   BBDamask.render('classic');
 });
+
+/* ────────────────────────────────────────────────────────────
+   UPLOAD-TO-DRIVE FLOW
+   Captures the rendered .sq-flyer element as a 1080×1080 PNG via
+   html2canvas, then POSTs the base64 to the GAS uploadFlyer endpoint.
+   Body MUST be text/plain — application/json triggers a CORS preflight
+   that GAS can't handle (silent 405).
+──────────────────────────────────────────────────────────── */
+function uploadFlyerToDrive() {
+  var btn = document.getElementById('upload-btn');
+  var status = document.getElementById('upload-status');
+  if (!btn || !status) return;
+
+  var flyerEl = document.querySelector('.sq-flyer');
+  if (!flyerEl) {
+    status.textContent = 'No flyer element found.';
+    status.style.color = '#E74C3C';
+    return;
+  }
+
+  btn.disabled = true;
+  status.textContent = 'Rendering…';
+  status.style.color = '#D4A843';
+
+  html2canvas(flyerEl, {
+    width: 1080,
+    height: 1080,
+    scale: 1,
+    backgroundColor: null,
+    useCORS: true,
+    logging: false
+  }).then(function(canvas) {
+    status.textContent = 'Uploading to Drive…';
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    var b64 = dataUrl.replace(/^data:image\/jpeg;base64,/, '');
+    return fetch(GAS_URL + '?action=uploadFlyer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: b64
+    });
+  }).then(function(resp) {
+    return resp.json();
+  }).then(function(data) {
+    if (data && data.status === 'ok') {
+      status.textContent = '✓ Uploaded — lineup emails will use this flyer for the next 7 days.';
+      status.style.color = '#2ECC71';
+    } else {
+      status.textContent = 'Upload failed: ' + (data && data.message ? data.message : 'unknown error');
+      status.style.color = '#E74C3C';
+    }
+    btn.disabled = false;
+  }).catch(function(err) {
+    status.textContent = 'Upload error: ' + err.message;
+    status.style.color = '#E74C3C';
+    btn.disabled = false;
+  });
+}
 var _orig = renderSchedule;
 renderSchedule = function(d) {
   _orig(d);
